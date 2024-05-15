@@ -1,0 +1,51 @@
+version: '3.7'
+services:
+  # our first container is our php apache
+  web:
+    # he will go to the docker file we do and build the php-apache image 
+    build: .
+    # real time connection between container and host that reflect the change that happened to the code in host to docker container 
+    volumes:
+      - ./:/var/www/html
+    ports:
+      # port of our web server 
+      - 80:80
+    # it ensures that container won't work until mysql have been started 
+    depends_on:
+      - mysql
+    # when the container stops unexpectedly then restart it to ensure the availability of container
+    restart: always
+
+  # our second container is our MySQL database
+  mysql:
+   # our image name 
+    image: mysql
+   # when the container stops unexpectedly then restart it to ensure the availability of container
+    restart: always
+    # environment variables
+    environment:
+      MYSQL_DATABASE: php-db
+      MYSQL_PASSWORD: 'nada'
+      MYSQL_USER: php-db
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+    # to save the data of database in volume 
+      - "./database:/var/lib/mysql"
+
+  # our third container is phpMyAdmin that we use to manage our MySQL database
+  phpmyadmin:
+  # our image name 
+    image: phpmyadmin/phpmyadmin
+  # it ensures that container won't work until mysql have been started 
+    depends_on:
+      - mysql
+    # when the container stops unexpectedly then restart it to ensure the availability of container
+    restart: always
+    # port of our phpmyadmin server 
+    ports:
+      - 8888:80
+    environment:
+    # database that he will work on it
+      PMA_HOST: mysql
+    # default value phpmyadmin works with  
+      PMA_PORT: 3306 
